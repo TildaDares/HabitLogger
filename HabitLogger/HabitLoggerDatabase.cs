@@ -5,17 +5,11 @@ namespace HabitLogger;
 
 public class HabitLoggerDatabase
 {
-    private readonly string FileName = "habitLoggerDb.db";
+    private const string FileName = "habitLoggerDb.db";
 
     public HabitLoggerDatabase()
     {
         CreateHabitLoggerDB();
-    }
-
-    public void CloseHabitLoggerConnection()
-    {
-        using var connection = new SqliteConnection($"Data Source={FileName}");
-        connection.Close();
     }
 
     public void InsertHabit(DateOnly date, int quantity, string unit)
@@ -40,6 +34,46 @@ public class HabitLoggerDatabase
         }
     }
 
+    public Habit GetHabit(int habitId)
+    {
+        using var connection = new SqliteConnection($"Data Source={FileName}");
+        Habit habit = null;
+        try
+        {
+            connection.Open();
+            var command = connection.CreateCommand();
+            command.CommandText =
+                $"SELECT * FROM habitLogger WHERE id = {habitId} LIMIT 1";
+            
+            using var reader = command.ExecuteReader();
+            if (reader.HasRows)
+            {
+                while (reader.Read())
+                {
+                    var id = reader.GetInt32(0);
+                    var date = DateOnly.Parse(reader.GetString(1), new CultureInfo("en-US"), DateTimeStyles.None);
+                    var quantity = reader.GetInt32(2);
+                    var unit = reader.GetString(3);
+
+                    habit = new Habit(id, date, quantity, unit);
+                }
+                Console.WriteLine("Habit retrieved!");
+            }
+
+            return habit;
+        }
+        catch (SqliteException e)
+        {
+            Console.WriteLine($"Unable to retrieve habit record with {habitId}. {e.Message}");
+        }
+        finally
+        {
+            connection.Close();
+        }
+        
+        return habit;
+    }
+    
     public List<Habit> GetAllHabits()
     {
         using var connection = new SqliteConnection($"Data Source={FileName}");
@@ -65,10 +99,8 @@ public class HabitLoggerDatabase
                 }
                 Console.WriteLine("All habits retrieved!");
             }
-            else
-            {
-                Console.WriteLine("No habits found!");
-            }
+
+            return habits;
         }
         catch (SqliteException e)
         {
