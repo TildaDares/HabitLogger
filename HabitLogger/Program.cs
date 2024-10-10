@@ -1,7 +1,7 @@
 ﻿using System.Globalization;
 using HabitLogger;
 
-HabitLoggerDatabase db = new HabitLoggerDatabase();
+var db = new HabitLoggerDatabase();
 
 void userInput()
 {
@@ -29,6 +29,12 @@ void userInput()
             case "3":
                 GetHabits();
                 break;
+            case "4":
+                UpdateHabit();
+                break;
+            case "6":
+                DeleteHabit();
+                break;
             default:
                 exit = true;
                 break;
@@ -36,10 +42,13 @@ void userInput()
     }
 }
 
+userInput();
+return;
+
 void InsertHabit()
 {
     Console.Clear();
-    DateOnly date = GetDateInput("Enter the date you want to log in the format dd/mm/yyyy: ");
+    var date = GetDateInput("Enter the date you want to log in the format dd/mm/yyyy: ");
     Console.Clear();
     
     var quantity = GetNumberInput("Please insert habit measure of your choice in integer (no decimals allowed): ");
@@ -60,6 +69,7 @@ void GetHabit()
         Console.WriteLine("No habit found!");
         return;
     }
+    
     Console.Clear();
     Console.WriteLine($"Habit Record");
     BuildTableHeader();
@@ -85,6 +95,20 @@ void GetHabits()
         Console.WriteLine($"|{habit.Id,15}|{habit.Date,15}|{habit.Quantity,15}|{habit.Unit,15}|");
         Console.WriteLine("-----------------------------------------------------------------");
     }
+}
+
+void UpdateHabit()
+{
+    GetHabits();
+    var id = GetNumberInput("Enter the habit ID you wish to update: ");
+    Console.Clear();
+    var date = GetDateInput("Enter the updated date in the format dd/mm/yyyy: ");
+    Console.Clear();
+    
+    var quantity = GetNumberInput("Enter the updated habit measure of your choice in integer (no decimals allowed): ");
+    Console.Clear();
+    var unit = GetUnitInput("Enter the updated unit of your habit e.g litres, glasses e.t.c");
+    db.UpdateHabit(id, date, quantity, unit);
 }
 
 DateOnly GetDateInput(string message)
@@ -122,7 +146,7 @@ string GetUnitInput(string message)
     Console.WriteLine("--------------------------");
     Console.WriteLine(message);
     
-    string unit = Console.ReadLine().Trim();
+    var unit = Console.ReadLine().Trim();
 
     return unit;
 }
@@ -136,5 +160,3 @@ void BuildTableHeader()
     Console.ResetColor();
     Console.WriteLine("-----------------------------------------------------------------");
 }
-
-userInput();

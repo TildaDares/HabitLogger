@@ -114,6 +114,29 @@ public class HabitLoggerDatabase
         return habits;
     }
     
+    public void UpdateHabit(int habitId, DateOnly date, int quantity, string unit)
+    {
+        using var connection = new SqliteConnection($"Data Source={FileName}");
+        try
+        {
+            connection.Open();
+            var command = connection.CreateCommand();
+            command.CommandText =
+                $"UPDATE habitLogger SET date = '{date}', quantity = '{quantity}', unit = '{unit}' WHERE id = '{habitId}'";
+            
+            var status = command.ExecuteNonQuery();
+            Console.WriteLine(status < 1 ? $"Unable to update habit record with ID {habitId}!" : "Habit Updated!");
+        }
+        catch (SqliteException e)
+        {
+            Console.WriteLine($"Unable to update habit record with {habitId}. {e.Message}");
+        }
+        finally
+        {
+            connection.Close();
+        }
+    }
+    
     private void CreateHabitLoggerDB()
     {
         using var connection = new SqliteConnection($"Data Source={FileName}");
