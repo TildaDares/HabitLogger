@@ -20,7 +20,11 @@ public class HabitLoggerDatabase
             connection.Open();
             var command = connection.CreateCommand();
             command.CommandText =
-                $"INSERT INTO habitLogger(date, quantity, unit) VALUES ('{date}', {quantity}, '{unit}')";
+                @"INSERT INTO habitLogger(date, quantity, unit) VALUES ($date, $quantity, $unit)";
+            command.Parameters.AddWithValue("$date", date);
+            command.Parameters.AddWithValue("$quantity", quantity);
+            command.Parameters.AddWithValue("$unit", unit);
+            
             var status = command.ExecuteNonQuery();
             Console.WriteLine(status < 1 ? "Unable to insert habit record!" : "Habit successfully inserted!");
         }
@@ -43,7 +47,8 @@ public class HabitLoggerDatabase
             connection.Open();
             var command = connection.CreateCommand();
             command.CommandText =
-                $"SELECT * FROM habitLogger WHERE id = {habitId} LIMIT 1";
+                @"SELECT * FROM habitLogger WHERE id = $id LIMIT 1";
+            command.Parameters.AddWithValue("$id", habitId);
             
             using var reader = command.ExecuteReader();
             if (reader.HasRows)
@@ -122,7 +127,11 @@ public class HabitLoggerDatabase
             connection.Open();
             var command = connection.CreateCommand();
             command.CommandText =
-                $"UPDATE habitLogger SET date = '{date}', quantity = '{quantity}', unit = '{unit}' WHERE id = '{habitId}'";
+                @"UPDATE habitLogger SET date = $date, quantity = $quantity, unit = $unit WHERE id = $id";
+            command.Parameters.AddWithValue("$date", date);
+            command.Parameters.AddWithValue("$quantity", quantity);
+            command.Parameters.AddWithValue("$unit", unit);
+            command.Parameters.AddWithValue("$id", habitId);
             
             var status = command.ExecuteNonQuery();
             Console.WriteLine(status < 1 ? $"Unable to update habit record with ID {habitId}!" : "Habit Updated!");
@@ -145,7 +154,8 @@ public class HabitLoggerDatabase
             connection.Open();
             var command = connection.CreateCommand();
             command.CommandText =
-                $"DELETE FROM habitLogger WHERE id = '{habitId}'";
+                @"DELETE FROM habitLogger WHERE id = $id";
+            command.Parameters.AddWithValue("$id", habitId);
             
             var status = command.ExecuteNonQuery();
             Console.WriteLine(status < 1 ? $"Unable to delete habit record with ID {habitId}!" : "Habit Deleted!");
