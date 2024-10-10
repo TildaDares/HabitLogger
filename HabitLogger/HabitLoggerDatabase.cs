@@ -1,3 +1,4 @@
+using System.Globalization;
 using Microsoft.Data.Sqlite;
 
 namespace HabitLogger;
@@ -37,7 +38,48 @@ public class HabitLoggerDatabase
         {
             connection.Close();
         }
+    }
+
+    public List<Habit> GetAllHabits()
+    {
+        using var connection = new SqliteConnection($"Data Source={FileName}");
+        var habits = new List<Habit>();
+        try
+        {
+            connection.Open();
+            var command = connection.CreateCommand();
+            command.CommandText =
+                "SELECT * FROM habitLogger";
+            using var reader = command.ExecuteReader();
+            
+            if (reader.HasRows)
+            {
+                while (reader.Read())
+                {
+                    var id = reader.GetInt32(0);
+                    var date = DateOnly.Parse(reader.GetString(1), new CultureInfo("en-US"), DateTimeStyles.None);
+                    var quantity = reader.GetInt32(2);
+                    var unit = reader.GetString(3);
+                    
+                    habits.Add(new Habit(id, date, quantity, unit));
+                }
+                Console.WriteLine("All habits retrieved!");
+            }
+            else
+            {
+                Console.WriteLine("No habits found!");
+            }
+        }
+        catch (SqliteException e)
+        {
+            Console.WriteLine($"Unable to retrieve all habit records. {e.Message}");
+        }
+        finally
+        {
+            connection.Close();
+        }
         
+        return habits;
     }
     
     private void CreateHabitLoggerDB()

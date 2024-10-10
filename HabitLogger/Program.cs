@@ -8,7 +8,7 @@ void userInput()
     var exit = false;
     while (!exit)
     {
-        Console.WriteLine("Welcome to Habit Logger: ");
+        Console.WriteLine("\nWelcome to Habit Logger: ");
         Console.WriteLine("Select an option:");
         Console.WriteLine("1. Insert a habit");
         Console.WriteLine("2. Get a habit");
@@ -22,6 +22,9 @@ void userInput()
         {
             case "1":
                 InsertHabit();
+                break;
+            case "3":
+                GetHabits();
                 break;
             default:
                 exit = true;
@@ -37,6 +40,25 @@ void InsertHabit()
     var unit = GetUnitInput("Please insert the unit of your habit e.g litres, glasses e.t.c");
     
     db.InsertHabit(date, quantity, unit);
+}
+
+void GetHabits()
+{
+    var habits = db.GetAllHabits();
+    Console.Clear();
+    Console.WriteLine("All habit records:");
+    Console.WriteLine("-----------------------------------------------------------------");
+    Console.ForegroundColor = ConsoleColor.Green;
+    Console.WriteLine("|" + "ID".PadLeft(15) + "|" + "Date".PadLeft(15) + "|" + "Quantity".PadLeft(15) + "|" +
+                      "Unit".PadLeft(15) + "|");
+    Console.ResetColor();
+    Console.WriteLine("-----------------------------------------------------------------");
+    
+    foreach (var habit in habits)
+    {
+        Console.WriteLine($"|{habit.Id,15}|{habit.Date,15}|{habit.Quantity,15}|{habit.Unit,15}|");
+        Console.WriteLine("-----------------------------------------------------------------");
+    }
 }
 
 DateOnly GetDateInput(string message)
