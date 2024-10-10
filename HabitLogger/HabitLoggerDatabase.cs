@@ -21,12 +21,12 @@ public class HabitLoggerDatabase
             var command = connection.CreateCommand();
             command.CommandText =
                 $"INSERT INTO habitLogger(date, quantity, unit) VALUES ('{date}', {quantity}, '{unit}')";
-            command.ExecuteNonQuery();
-            Console.WriteLine($"Record successfully inserted!");
+            var status = command.ExecuteNonQuery();
+            Console.WriteLine(status < 1 ? "Unable to insert habit record!" : "Habit successfully inserted!");
         }
         catch (SqliteException e)
         {
-            Console.WriteLine($"Record not inserted. {e.Message}");
+            Console.WriteLine($"Unable to insert habit record! {e.Message}");
         }
         finally
         {
@@ -130,6 +130,29 @@ public class HabitLoggerDatabase
         catch (SqliteException e)
         {
             Console.WriteLine($"Unable to update habit record with {habitId}. {e.Message}");
+        }
+        finally
+        {
+            connection.Close();
+        }
+    }
+    
+    public void DeleteHabit(int habitId)
+    {
+        using var connection = new SqliteConnection($"Data Source={FileName}");
+        try
+        {
+            connection.Open();
+            var command = connection.CreateCommand();
+            command.CommandText =
+                $"DELETE FROM habitLogger WHERE id = '{habitId}'";
+            
+            var status = command.ExecuteNonQuery();
+            Console.WriteLine(status < 1 ? $"Unable to delete habit record with ID {habitId}!" : "Habit Deleted!");
+        }
+        catch (SqliteException e)
+        {
+            Console.WriteLine($"Unable to delete habit record with {habitId}. {e.Message}");
         }
         finally
         {

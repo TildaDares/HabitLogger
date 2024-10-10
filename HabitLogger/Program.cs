@@ -32,7 +32,7 @@ void userInput()
             case "4":
                 UpdateHabit();
                 break;
-            case "6":
+            case "5":
                 DeleteHabit();
                 break;
             default:
@@ -109,6 +109,13 @@ void UpdateHabit()
     Console.Clear();
     var unit = GetUnitInput("Enter the updated unit of your habit e.g litres, glasses e.t.c");
     db.UpdateHabit(id, date, quantity, unit);
+}
+
+void DeleteHabit()
+{
+    GetHabits();
+    var id = GetNumberInput("Enter the habit ID you wish to delete: ");
+    db.DeleteHabit(id);
 }
 
 DateOnly GetDateInput(string message)
