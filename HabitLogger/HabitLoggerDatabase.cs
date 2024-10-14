@@ -66,8 +66,6 @@ public class HabitLoggerDatabase
                 }
                 Console.WriteLine("Habit retrieved!");
             }
-
-            return habit;
         }
         catch (SqliteException e)
         {
@@ -107,8 +105,6 @@ public class HabitLoggerDatabase
                 }
                 Console.WriteLine("All habits retrieved!");
             }
-
-            return habits;
         }
         catch (SqliteException e)
         {
@@ -119,6 +115,85 @@ public class HabitLoggerDatabase
             connection.Close();
         }
         
+        return habits;
+    }
+
+    public int GetHabitsByTypeAndDate(string habitType, DateOnly? startDate, DateOnly? endDate)
+    {
+        using var connection = new SqliteConnection($"Data Source={FileName}");
+        var result = 0;
+        try
+        {
+            connection.Open();
+            var command = connection.CreateCommand();
+            command.CommandText =
+                @"SELECT SUM(quantity) FROM habitLogger WHERE type = $type";
+            if (startDate.HasValue && endDate.HasValue)
+            {
+                command.CommandText += @" AND DATE(date) BETWEEN DATE($startDate) AND DATE($endDate)";
+                command.Parameters.AddWithValue("$startDate", startDate);
+                command.Parameters.AddWithValue("$endDate", endDate);
+            }
+            
+            command.Parameters.AddWithValue("$type", habitType);
+            var status = command.ExecuteScalar();
+
+            if (status is not (null or DBNull))
+            {
+                result = Convert.ToInt32(status);
+            }
+        }
+        catch (SqliteException e)
+        {
+            Console.WriteLine($"Unable to query habits by type {habitType}. {e.Message}");
+        }
+        finally
+        {
+            connection.Close();
+        }
+
+        return result;
+    }
+    
+    public List<Habit> GetHabitsByDate(DateOnly startDate, DateOnly endDate)
+    {
+        using var connection = new SqliteConnection($"Data Source={FileName}");
+        var habits = new List<Habit>();
+        try
+        {
+            connection.Open();
+            var command = connection.CreateCommand();
+            command.CommandText =
+                @"SELECT * FROM habitLogger WHERE DATE(date) BETWEEN DATE($startDate) AND DATE($endDate) ORDER BY DATE(date) ASC";
+            
+            command.Parameters.AddWithValue("$startDate", startDate);
+            command.Parameters.AddWithValue("$endDate", endDate);
+            using var reader = command.ExecuteReader();
+            
+            if (reader.HasRows)
+            {
+                while (reader.Read())
+                {
+                    var id = reader.GetInt32(0);
+                    var date = DateOnly.Parse(reader.GetString(1), new CultureInfo("en-US"), DateTimeStyles.None);
+                    var quantity = reader.GetInt32(2);
+                    var unit = reader.GetString(3);
+                    var type = reader.GetString(4);
+                    
+                    habits.Add(new Habit(id, date, quantity, unit, type));
+                }
+                Console.WriteLine($"All habits between {startDate} and {endDate} retrieved!");
+            }
+        }
+        catch (SqliteException e)
+        {
+            Console.WriteLine($"Unable to query between {startDate} and {endDate}. {e.Message}");
+        }
+        finally
+        {
+            connection.Close();
+        }
+
         return habits;
     }
     
@@ -184,8 +259,8 @@ public class HabitLoggerDatabase
             var command = connection.CreateCommand();
             command.CommandText = "SELECT COUNT(*) FROM habitLogger";
             count = (long)command.ExecuteScalar();
-            return count;
-        } catch (SqliteException e)
+        } 
+        catch (SqliteException e)
         {
             Console.WriteLine($"Unable to count habit records. {e.Message}");
         }
@@ -221,7 +296,8 @@ public class HabitLoggerDatabase
             {
                 SeedHabitLoggerDB();
             }
-        } catch (SqliteException e)
+        }
+        catch (SqliteException e)
         {
             Console.WriteLine($"Unable to create database. {e.Message}");
         }
@@ -259,7 +335,8 @@ public class HabitLoggerDatabase
                 
                 command.ExecuteNonQuery();
             }
-        } catch (SqliteException e)
+        }
+        catch (SqliteException e)
         {
             Console.WriteLine($"Unable to seed database. {e.Message}");
         }
