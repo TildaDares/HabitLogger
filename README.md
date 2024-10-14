@@ -32,11 +32,13 @@ Habit Logger is a C# console application designed for users to log the occurrenc
 
 ## Project Structure
 
+```plaintext
 HabitLogger
 ├── Program.cs                  # Entry point of the application
 ├── HabitLoggerDatabase.cs      # Manages SQLite database connections and CRUD operations
 ├── Habit.cs                    # Represents the Habit entity
 └── README.md                   # Project documentation
+```
 
 ## Usage
 
