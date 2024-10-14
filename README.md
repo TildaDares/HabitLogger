@@ -42,7 +42,7 @@ HabitLogger
 
 ## Usage
 
-<img width="273" alt="A console interface displaying the welcome message for Habit Logger and a menu with the following options: 1. Insert a habit 2. Get a habit 3. Get all habits 4. Update a habit 5. Delete a habit 0. Exit" src="https://github.com/user-attachments/assets/439fcb4a-6b7f-4534-89a8-72b7c68e48b1">
+<img width="273" alt="A console interface displaying the welcome message for Habit Logger and a menu with the following options: 1. Insert a habit 2. Get a habit 3. Get all habits 4. Update a habit 5. Delete a habit 6. View report on habit by type and date 7. View habits by date 0. Exit" src="https://github.com/user-attachments/assets/39ab3f98-51da-4cc5-a1f6-5f8a0cf7d286">
 
 ### Logging a Habit
 
