@@ -12,7 +12,7 @@ public class HabitLoggerDatabase
         CreateHabitLoggerDB();
     }
 
-    public void InsertHabit(DateOnly date, int quantity, string unit)
+    public void InsertHabit(DateOnly date, int quantity, string unit, string type)
     {
         using var connection = new SqliteConnection($"Data Source={FileName}");
         try
@@ -20,10 +20,11 @@ public class HabitLoggerDatabase
             connection.Open();
             var command = connection.CreateCommand();
             command.CommandText =
-                @"INSERT INTO habitLogger(date, quantity, unit) VALUES ($date, $quantity, $unit)";
+                @"INSERT INTO habitLogger(date, quantity, unit, type) VALUES ($date, $quantity, $unit, $type)";
             command.Parameters.AddWithValue("$date", date);
             command.Parameters.AddWithValue("$quantity", quantity);
             command.Parameters.AddWithValue("$unit", unit);
+            command.Parameters.AddWithValue("$type", type);
             
             var status = command.ExecuteNonQuery();
             Console.WriteLine(status < 1 ? "Unable to insert habit record!" : "Habit successfully inserted!");
@@ -59,8 +60,9 @@ public class HabitLoggerDatabase
                     var date = DateOnly.Parse(reader.GetString(1), new CultureInfo("en-US"), DateTimeStyles.None);
                     var quantity = reader.GetInt32(2);
                     var unit = reader.GetString(3);
+                    var type = reader.GetString(4);
 
-                    habit = new Habit(id, date, quantity, unit);
+                    habit = new Habit(id, date, quantity, unit, type);
                 }
                 Console.WriteLine("Habit retrieved!");
             }
@@ -99,8 +101,9 @@ public class HabitLoggerDatabase
                     var date = DateOnly.Parse(reader.GetString(1), new CultureInfo("en-US"), DateTimeStyles.None);
                     var quantity = reader.GetInt32(2);
                     var unit = reader.GetString(3);
+                    var type = reader.GetString(4);
                     
-                    habits.Add(new Habit(id, date, quantity, unit));
+                    habits.Add(new Habit(id, date, quantity, unit, type));
                 }
                 Console.WriteLine("All habits retrieved!");
             }
@@ -119,7 +122,7 @@ public class HabitLoggerDatabase
         return habits;
     }
     
-    public void UpdateHabit(int habitId, DateOnly date, int quantity, string unit)
+    public void UpdateHabit(int habitId, DateOnly date, int quantity, string unit, string type)
     {
         using var connection = new SqliteConnection($"Data Source={FileName}");
         try
@@ -127,10 +130,11 @@ public class HabitLoggerDatabase
             connection.Open();
             var command = connection.CreateCommand();
             command.CommandText =
-                @"UPDATE habitLogger SET date = $date, quantity = $quantity, unit = $unit WHERE id = $id";
+                @"UPDATE habitLogger SET date = $date, quantity = $quantity, unit = $unit, type = $type WHERE id = $id";
             command.Parameters.AddWithValue("$date", date);
             command.Parameters.AddWithValue("$quantity", quantity);
             command.Parameters.AddWithValue("$unit", unit);
+            command.Parameters.AddWithValue("$type", type);
             command.Parameters.AddWithValue("$id", habitId);
             
             var status = command.ExecuteNonQuery();
@@ -169,18 +173,51 @@ public class HabitLoggerDatabase
             connection.Close();
         }
     }
+
+    public long CountHabits()
+    {
+        using var connection = new SqliteConnection($"Data Source={FileName}");
+        long count = 0;
+        try
+        {
+            connection.Open();
+            var command = connection.CreateCommand();
+            command.CommandText = "SELECT COUNT(*) FROM habitLogger";
+            count = (long)command.ExecuteScalar();
+            return count;
+        } catch (SqliteException e)
+        {
+            Console.WriteLine($"Unable to count habit records. {e.Message}");
+        }
+        finally
+        {
+            connection.Close();
+        }
+
+        return count;
+    }
     
     private void CreateHabitLoggerDB()
     {
         using var connection = new SqliteConnection($"Data Source={FileName}");
-        connection.Open();
-        var command = connection.CreateCommand();
-        command.CommandText = @" CREATE TABLE IF NOT EXISTS habitLogger (
+        try
+        {
+            connection.Open();
+            var command = connection.CreateCommand();
+            command.CommandText = @" CREATE TABLE IF NOT EXISTS habitLogger (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 date TEXT NOT NULL,
                 quantity INTEGER NOT NULL,
-                unit TEXT )";
-        command.ExecuteNonQuery();
-        connection.Close();
+                unit TEXT,
+                type TEXT NOT NULL )";
+            command.ExecuteNonQuery();
+        } catch (SqliteException e)
+        {
+            Console.WriteLine($"Unable to create database. {e.Message}");
+        }
+        finally
+        {
+            connection.Close();
+        }
     }
 }
