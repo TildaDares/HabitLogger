@@ -211,9 +211,57 @@ public class HabitLoggerDatabase
                 unit TEXT,
                 type TEXT NOT NULL )";
             command.ExecuteNonQuery();
+            
+            // Check if table is already populated
+            command.CommandText = "SELECT COUNT(*) FROM habitLogger";
+            var count = Convert.ToInt32(command.ExecuteScalar());
+            connection.Close();
+            
+            if (count == 0)
+            {
+                SeedHabitLoggerDB();
+            }
         } catch (SqliteException e)
         {
             Console.WriteLine($"Unable to create database. {e.Message}");
+        }
+        finally
+        {
+            connection.Close();
+        }
+    }
+
+    private void SeedHabitLoggerDB()
+    {
+        using var connection = new SqliteConnection($"Data Source={FileName}");
+        try
+        {
+            connection.Open();
+            var habits = new List<(string, string)>() {("running", "kms"), ("sleeping", "hrs"), ("walking", "steps"), ("knitting", "stitches")};
+            var rand = new Random();
+            var startDay = new DateOnly(DateTime.UtcNow.Year, 1, 1).DayNumber;
+            var endDay = new DateOnly(DateTime.UtcNow.Year, DateTime.UtcNow.Month, 28).DayNumber;
+
+            for (var i = 0; i < 100; i++)
+            {
+                var command = connection.CreateCommand();
+                command.CommandText =
+                    @"INSERT INTO habitLogger(date, quantity, unit, type) VALUES ($date, $quantity, $unit, $type)";
+                
+                var randomDayNumber = rand.Next(startDay, endDay + 1);
+                var randomDateInTheYear = DateOnly.FromDayNumber(randomDayNumber);
+                var randomHabit = rand.Next(0, habits.Count);
+                
+                command.Parameters.AddWithValue("$date", randomDateInTheYear);
+                command.Parameters.AddWithValue("$quantity", rand.Next(1, 10000));
+                command.Parameters.AddWithValue("$unit", habits[randomHabit].Item2);
+                command.Parameters.AddWithValue("$type", habits[randomHabit].Item1);
+                
+                command.ExecuteNonQuery();
+            }
+        } catch (SqliteException e)
+        {
+            Console.WriteLine($"Unable to seed database. {e.Message}");
         }
         finally
         {
