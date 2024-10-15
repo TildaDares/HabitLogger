@@ -242,10 +242,10 @@ DateOnly GetDateInput(string message, DateOnly? minRange = null, DateOnly? maxRa
         Console.WriteLine(message);
         input = Console.ReadLine().Trim();
         
-        // If input is empty and optional, break the loop
+        // If input is empty and optional, return DateOnly default
         if (input == "" && paramIsOptional)
         {
-            return default; // Or handle differently if needed
+            return default;
         }
     } while (!DateOnly.TryParseExact(input, "dd/MM/yyyy", new CultureInfo("en-US"), DateTimeStyles.None,
                  out dateOnly) || dateOnly > maxRange || dateOnly < minRange);
