@@ -52,14 +52,11 @@ public class HabitLoggerDatabase
             command.Parameters.AddWithValue("$id", habitId);
             
             using var reader = command.ExecuteReader();
-            if (reader.HasRows)
+            while (reader.Read())
             {
-                while (reader.Read())
-                {
-                    habit = ReadHabitFromReader(reader);
-                }
-                Console.WriteLine("Habit retrieved!");
+                habit = ReadHabitFromReader(reader);
             }
+            Console.WriteLine("Habit retrieved!");
         }
         catch (SqliteException e)
         {
@@ -85,14 +82,11 @@ public class HabitLoggerDatabase
                 "SELECT * FROM habitLogger";
             using var reader = command.ExecuteReader();
             
-            if (reader.HasRows)
+            while (reader.Read())
             {
-                while (reader.Read())
-                {
-                    habits.Add(ReadHabitFromReader(reader));
-                }
-                Console.WriteLine("All habits retrieved!");
+                habits.Add(ReadHabitFromReader(reader));
             }
+            Console.WriteLine("All habits retrieved!");
         }
         catch (SqliteException e)
         {
@@ -158,14 +152,11 @@ public class HabitLoggerDatabase
             command.Parameters.AddWithValue("$endDate", endDate);
             using var reader = command.ExecuteReader();
             
-            if (reader.HasRows)
+            while (reader.Read())
             {
-                while (reader.Read())
-                {
-                    habits.Add(ReadHabitFromReader(reader));
-                }
-                Console.WriteLine($"All habits between {startDate} and {endDate} retrieved!");
+                habits.Add(ReadHabitFromReader(reader));
             }
+            Console.WriteLine($"All habits between {startDate} and {endDate} retrieved!");
         }
         catch (SqliteException e)
         {
