@@ -190,6 +190,15 @@ void UpdateHabit()
     GetHabits();
     var id = GetNumberInput("Enter the habit ID you wish to update: ");
     Console.Clear();
+
+    var habit = db.GetHabit(id);
+    if (habit == null)
+    {
+        Console.WriteLine("No habit found with that ID!");
+        ContinueMenu();
+        return;
+    }
+    
     var date = GetDateInput("Enter the updated date in the format dd/mm/yyyy: ");
     Console.Clear();
     
