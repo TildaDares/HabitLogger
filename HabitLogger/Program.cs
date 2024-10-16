@@ -11,6 +11,7 @@ void UserInput()
     var exit = false;
     while (!exit)
     {
+        Console.Clear();
         Console.WriteLine("\nWelcome to Habit Logger: ");
         Console.WriteLine("Select an option:");
         Console.WriteLine("1. Insert a habit");
@@ -236,19 +237,32 @@ DateOnly GetDateInput(string message, DateOnly? minRange = null, DateOnly? maxRa
     maxRange ??= DateOnly.MaxValue;
 
     DateOnly dateOnly;
-    string input;
-    do
+    while (true)
     {
         Console.WriteLine(message);
-        input = Console.ReadLine().Trim();
+        var input = Console.ReadLine().Trim();
+        
+        if (!DateOnly.TryParseExact(input, "dd/MM/yyyy", new CultureInfo("en-US"), DateTimeStyles.None,
+                out dateOnly))
+        {
+            Console.WriteLine($"Invalid date input!\n");
+            continue;
+        }
+        
+        if (dateOnly > maxRange || dateOnly < minRange)
+        {
+            Console.WriteLine("Date is out of range!\n");
+            continue;
+        } 
         
         // If input is empty and optional, return DateOnly default
         if (input == "" && paramIsOptional)
         {
             return default;
         }
-    } while (!DateOnly.TryParseExact(input, "dd/MM/yyyy", new CultureInfo("en-US"), DateTimeStyles.None,
-                 out dateOnly) || dateOnly > maxRange || dateOnly < minRange);
+
+        break;
+    }
 
     return dateOnly;
 }
