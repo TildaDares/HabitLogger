@@ -242,6 +242,12 @@ DateOnly GetDateInput(string message, DateOnly? minRange = null, DateOnly? maxRa
         Console.WriteLine(message);
         var input = Console.ReadLine().Trim();
         
+        // If input is empty and optional, return DateOnly default
+        if (input == "" && paramIsOptional)
+        {
+            return default;
+        }
+        
         if (!DateOnly.TryParseExact(input, "dd/MM/yyyy", new CultureInfo("en-US"), DateTimeStyles.None,
                 out dateOnly))
         {
@@ -253,12 +259,6 @@ DateOnly GetDateInput(string message, DateOnly? minRange = null, DateOnly? maxRa
         {
             Console.WriteLine("Date is out of range!\n");
             continue;
-        } 
-        
-        // If input is empty and optional, return DateOnly default
-        if (input == "" && paramIsOptional)
-        {
-            return default;
         }
 
         break;
