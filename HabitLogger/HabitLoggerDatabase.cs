@@ -56,13 +56,7 @@ public class HabitLoggerDatabase
             {
                 while (reader.Read())
                 {
-                    var id = reader.GetInt32(0);
-                    var date = DateOnly.Parse(reader.GetString(1), new CultureInfo("en-US"), DateTimeStyles.None);
-                    var quantity = reader.GetInt32(2);
-                    var unit = reader.GetString(3);
-                    var type = reader.GetString(4);
-
-                    habit = new Habit(id, date, quantity, unit, type);
+                    habit = ReadHabitFromReader(reader);
                 }
                 Console.WriteLine("Habit retrieved!");
             }
@@ -95,13 +89,7 @@ public class HabitLoggerDatabase
             {
                 while (reader.Read())
                 {
-                    var id = reader.GetInt32(0);
-                    var date = DateOnly.Parse(reader.GetString(1), new CultureInfo("en-US"), DateTimeStyles.None);
-                    var quantity = reader.GetInt32(2);
-                    var unit = reader.GetString(3);
-                    var type = reader.GetString(4);
-                    
-                    habits.Add(new Habit(id, date, quantity, unit, type));
+                    habits.Add(ReadHabitFromReader(reader));
                 }
                 Console.WriteLine("All habits retrieved!");
             }
@@ -174,13 +162,7 @@ public class HabitLoggerDatabase
             {
                 while (reader.Read())
                 {
-                    var id = reader.GetInt32(0);
-                    var date = DateOnly.Parse(reader.GetString(1), new CultureInfo("en-US"), DateTimeStyles.None);
-                    var quantity = reader.GetInt32(2);
-                    var unit = reader.GetString(3);
-                    var type = reader.GetString(4);
-                    
-                    habits.Add(new Habit(id, date, quantity, unit, type));
+                    habits.Add(ReadHabitFromReader(reader));
                 }
                 Console.WriteLine($"All habits between {startDate} and {endDate} retrieved!");
             }
@@ -344,5 +326,16 @@ public class HabitLoggerDatabase
         {
             connection.Close();
         }
+    }
+    
+    private Habit ReadHabitFromReader(SqliteDataReader reader)
+    {
+        var id = reader.GetInt32(0);
+        var date = DateOnly.Parse(reader.GetString(1), new CultureInfo("en-US"), DateTimeStyles.None);
+        var quantity = reader.GetInt32(2);
+        var unit = reader.GetString(3);
+        var type = reader.GetString(4);
+        
+        return new Habit(id, date, quantity, unit, type);
     }
 }
